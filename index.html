@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harmony2 まで</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#0d2b1d; --bg2:#123d28;
+  --ink:#f4fbf3; --sub:#bfe3c6; --accent:#9be15d; --pink:#ffb3c7; --gold:#ffe08a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+[hidden]{display:none!important}
+body{
+  font-family:"Zen Maru Gothic",system-ui,sans-serif;color:var(--ink);
+  background:linear-gradient(160deg,var(--bg1),var(--bg2));
+  transition:background .8s ease;min-height:100vh;overflow-x:hidden;
+}
+.num{font-family:"Outfit",sans-serif}
+#bar{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--accent),var(--pink),var(--gold));z-index:50}
+#mini{position:fixed;top:12px;right:14px;z-index:40;font-size:12px;padding:6px 12px;border-radius:99px;
+  background:rgba(255,255,255,.12);backdrop-filter:blur(8px);opacity:0;transition:opacity .4s}
+#mini.on{opacity:1}
+
+/* floating particles */
+#stage{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.spots{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:-1}
+.spots i{position:absolute;top:-10%;width:40vw;height:130%;transform-origin:50% 0;
+  background:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,0) 80%);
+  clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);filter:blur(6px);mix-blend-mode:screen;animation:sweep 6s ease-in-out infinite alternate}
+.spots i:nth-child(1){left:-5%;animation-delay:0s}
+.spots i:nth-child(2){left:30%;animation-delay:-2s;background:linear-gradient(rgba(155,225,93,.3),transparent 80%)}
+.spots i:nth-child(3){left:65%;animation-delay:-4s;background:linear-gradient(rgba(255,179,199,.3),transparent 80%)}
+@keyframes sweep{from{transform:rotate(-22deg)}to{transform:rotate(22deg)}}
+.discs{display:flex;gap:18px;justify-content:center;margin:26px 0 6px}
+.disc{width:92px;height:92px;border-radius:50%;position:relative;animation:spin 6s linear infinite;
+  box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.disc::after{content:"";position:absolute;inset:38%;border-radius:50%;background:#111;box-shadow:0 0 0 6px rgba(255,255,255,.85)}
+.disc.a{background:repeating-radial-gradient(circle,#0003 0 2px,transparent 2px 5px),conic-gradient(#9be15d,#ffe08a,#ffb3c7,#8fd3ff,#9be15d)}
+.disc.b{background:repeating-radial-gradient(circle,#0003 0 2px,transparent 2px 5px),conic-gradient(#ffb3c7,#c79bff,#8fd3ff,#ffb3c7);animation-duration:8s}
+.disc.c{background:repeating-radial-gradient(circle,#0003 0 2px,transparent 2px 5px),conic-gradient(#ffe08a,#ff9a6b,#9be15d,#ffe08a);animation-duration:5s}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tapebtn{margin-top:22px;padding:12px 20px;border-radius:99px;border:1px solid rgba(255,255,255,.4);background:linear-gradient(90deg,#c9ccd3,#fff,#b8bcc6);color:#222;font-weight:700;font-family:inherit;font-size:14px;cursor:pointer}
+
+section{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 22px;text-align:center}
+.reveal{opacity:0;transform:translateY(40px) scale(.98);transition:all .9s cubic-bezier(.2,.8,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* hero */
+.eyebrow{letter-spacing:.3em;font-size:13px;color:var(--sub)}
+.title{font-size:clamp(44px,13vw,110px);font-weight:900;line-height:1;margin:14px 0 6px;
+  background:linear-gradient(90deg,var(--accent),#fff,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.meta{color:var(--sub);font-size:15px}
+.scrollhint{position:absolute;bottom:28px;font-size:12px;color:var(--sub);animation:bob 1.8s infinite}
+@keyframes bob{50%{transform:translateY(8px)}}
+
+/* countdown */
+.days{font-size:clamp(110px,38vw,260px);font-weight:800;line-height:.9;
+  text-shadow:0 0 40px rgba(155,225,93,.45)}
+.unit{font-size:20px;color:var(--sub);margin-top:4px}
+.clock{display:flex;gap:14px;margin-top:28px}
+.clock div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:12px 14px;min-width:76px}
+.clock b{display:block;font-size:30px}
+.clock span{font-size:11px;color:var(--sub)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:520px;width:100%;margin-top:26px}
+.stat{background:rgba(255,255,255,.07);border-radius:22px;padding:22px 12px}
+.stat b{font-size:40px;display:block;color:var(--gold)}
+.stat span{font-size:13px;color:var(--sub)}
+h2{font-size:clamp(26px,7vw,40px);font-weight:900;margin-bottom:6px}
+.lead{color:var(--sub);font-size:14px}
+
+/* timeline */
+.timeline{position:relative;max-width:560px;width:100%;margin-top:34px;text-align:left}
+.timeline::before{content:"";position:absolute;left:18px;top:0;bottom:0;width:3px;border-radius:3px;
+  background:linear-gradient(var(--accent),var(--pink),var(--gold))}
+.live{position:relative;margin:0 0 26px 50px;padding:18px 18px 16px;border-radius:20px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+.live::before{content:"";position:absolute;left:-40px;top:22px;width:17px;height:17px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 0 5px rgba(155,225,93,.25)}
+.live .d{font-size:13px;color:var(--gold)}
+.live .n{font-size:19px;font-weight:700;margin:4px 0}
+.live .v{font-size:13px;color:var(--sub)}
+.live .memo{font-size:14px;margin-top:8px;line-height:1.6}
+.live.next{background:linear-gradient(135deg,rgba(155,225,93,.25),rgba(255,179,199,.2));border-color:var(--accent)}
+.live.next::before{background:var(--pink);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 12px rgba(255,179,199,0)}}
+.placeholder{opacity:.55;border-style:dashed}
+
+/* ticket */
+.ticket{max-width:420px;width:100%;margin-top:28px;border-radius:24px;overflow:hidden;
+  background:#fffdf5;color:#173322;box-shadow:0 30px 60px rgba(0,0,0,.35);transform:rotate(-2deg)}
+.ticket .top{padding:26px 22px;background:linear-gradient(135deg,var(--accent),#5fc77a);color:#0d2b1d;text-align:left}
+.ticket .top small{letter-spacing:.25em;font-size:11px}
+.ticket .top div{font-size:38px;font-weight:900;font-family:"Outfit"}
+.ticket .row{display:flex;justify-content:space-between;padding:14px 22px;border-top:2px dashed #cfe5d3;text-align:left;font-size:14px}
+.ticket .row span{color:#5b7a66;font-size:11px;display:block}
+
+/* checklist */
+.check{max-width:460px;width:100%;margin-top:26px;text-align:left}
+.check label{display:flex;align-items:center;gap:12px;padding:14px 16px;margin-bottom:10px;border-radius:16px;
+  background:rgba(255,255,255,.08);cursor:pointer;transition:all .3s}
+.check input{width:22px;height:22px;accent-color:var(--accent)}
+.check label.done{background:rgba(155,225,93,.22);text-decoration:line-through;color:var(--sub)}
+.prog{margin-top:8px;font-size:14px;color:var(--gold)}
+
+.spbtn{display:inline-block;margin-top:22px;padding:14px 22px;border-radius:99px;background:#1ed760;color:#06210f;font-weight:700;text-decoration:none;font-size:15px;box-shadow:0 10px 30px rgba(30,215,96,.35)}
+.today{margin-top:26px;max-width:460px;width:100%;padding:20px;border-radius:22px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}
+.today small{color:var(--sub);font-size:12px;letter-spacing:.2em}
+.today b{display:block;font-size:24px;margin-top:6px}
+.hit{font-size:56px;font-weight:800;color:var(--gold);margin:16px 0}
+.songs label.done{text-decoration:none;color:var(--ink);background:rgba(255,179,199,.3)}
+.end p{font-size:clamp(24px,7vw,40px);font-weight:900;line-height:1.5}
+footer{font-size:11px;color:var(--sub);padding:30px;text-align:center;position:relative;z-index:1}
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+<div id="bar"></div>
+<div id="mini" class="num"></div>
+
+<!-- 1. hero -->
+<section data-bg="#0d2b1d,#123d28" data-pen="#9be15d,#ffffff,#9be15d,#ffb3c7,#9be15d">
+  <p class="eyebrow reveal">MY ROAD TO</p>
+  <h1 class="title num reveal">Harmony2</h1>
+  <p class="meta reveal">2027.06.01 ／ Kアリーナ横浜</p>
+  <p class="scrollhint">▼ scroll</p>
+</section>
+
+<!-- 2. countdown -->
+<section data-bg="#0b2233,#123f4a">
+  <div class="spots"><i></i><i></i><i></i></div>
+  <p class="eyebrow reveal">当日まで あと</p>
+  <div class="days num reveal" id="days">--</div>
+  <p class="unit reveal">日</p>
+  <div class="clock num reveal">
+    <div><b id="h">--</b><span>時間</span></div>
+    <div><b id="m">--</b><span>分</span></div>
+    <div><b id="s">--</b><span>秒</span></div>
+  </div>
+</section>
+
+<!-- 3. fun stats -->
+<section data-bg="#2a1736,#3d2050">
+  <h2 class="reveal">言い換えると…</h2>
+  <p class="lead reveal">ライブまでの時間を、身近な単位で数えてみました</p>
+  <div class="stats">
+    <div class="stat reveal"><b class="num" id="weekends">-</b><span>回の週末</span></div>
+    <div class="stat reveal"><b class="num" id="sleeps">-</b><span>回寝たら当日</span></div>
+    <div class="stat reveal"><b class="num" id="months">-</b><span>か月ちょっと</span></div>
+    <div class="stat reveal"><b class="num" id="pct">-</b><span>% 道のり完了</span></div>
+  </div>
+</section>
+
+<!-- 4. timeline -->
+<section data-bg="#13261b,#1f4430" data-pen="#9be15d,#ffe08a,#8fd3ff,#ffb3c7,#c79bff,#ffffff">
+  <h2 class="reveal">これまでの参戦記録</h2>
+  <p class="lead reveal">スクロールで振り返る、わたしのミセス遍歴</p>
+  <div class="timeline" id="timeline"></div>
+</section>
+
+<!-- 5. ticket -->
+<section data-bg="#3a1e2a,#5a2a3c" data-pen="#ffb3c7,#ffffff,#ffb3c7" data-tape="110">
+  <h2 class="reveal">そして、次は</h2>
+  <div class="ticket reveal">
+    <div class="top"><small>NEXT LIVE</small><div>Harmony2</div></div>
+    <div class="row"><div><span>DATE</span>2027.06.01 (Tue)</div><div><span>STATUS</span>当選済み ✓</div></div>
+    <div class="row"><div><span>VENUE</span>Kアリーナ横浜</div><div><span>SEAT</span>当日のお楽しみ</div></div>
+  </div>
+</section>
+
+<!-- 5.5 playlist -->
+<section data-bg="#0f1f3a,#1d3a6b">
+  <p class="eyebrow reveal">WISH LIST</p>
+  <h2 class="reveal">このライブで聴きたい曲</h2>
+  <div class="discs reveal"><div class="disc a"></div><div class="disc b"></div><div class="disc c"></div></div>
+  <div class="days num reveal" style="font-size:clamp(100px,32vw,200px)">24</div>
+  <p class="unit reveal">曲</p>
+  <a class="spbtn reveal" href="https://open.spotify.com/playlist/0fd4NUqjWhG7vPQNioMLGv">▶ 「harmonyお願い」を Spotify で聴く</a>
+  <div class="stats">
+    <div class="stat reveal"><b class="num" id="loops">-</b><span>周：1日1周なら当日までに</span></div>
+    <div class="stat reveal"><b class="num" id="perweek">-</b><span>曲：1週間ごとの予習ペース</span></div>
+  </div>
+  <div id="today" class="today reveal" hidden></div>
+</section>
+
+<!-- 5.6 setlist answer -->
+<section data-bg="#2a0f2e,#4d1b52" id="setlistSec" hidden data-pen="#c79bff,#ffb3c7,#8fd3ff,#ffffff">
+  <h2 class="reveal">当日の答え合わせ</h2>
+  <p class="lead reveal">ライブ後、聴けた曲をタップ</p>
+  <div class="hit num reveal" id="hit">0 / 24</div>
+  <div class="check songs" id="songs"></div>
+</section>
+
+<!-- 6. checklist -->
+<section data-bg="#2b2a10,#4a4518">
+  <h2 class="reveal">準備リスト</h2>
+  <p class="lead reveal">チェックはこの端末に保存されます</p>
+  <div class="check" id="check"></div>
+  <p class="prog num" id="prog"></p>
+</section>
+
+<!-- 7. end -->
+<section class="end" data-bg="#0d2b1d,#1b5a35" data-pen="#9be15d,#ffe08a,#ffb3c7,#8fd3ff,#c79bff,#ffffff" data-tape="160">
+  <p class="reveal">あと <span class="num" id="days2">--</span> 日。<br>楽しみに待とう。</p>
+  <button class="tapebtn reveal" data-retape>銀テープをもう一回 ✨</button>
+</section>
+
+<footer>非公式のファンメイドページです</footer>
+
+<script>
+const TARGET = new Date("2027-06-01T00:00:00+09:00");
+const START  = new Date("2026-11-01T00:00:00+09:00"); // 道のり%の起点
+
+// ▼ 参戦記録：ここを書き換えて追加してください
+const LIVES = [
+  { date:"2026.07.04 (Sat)", name:"ゼンジン未到とイ/ミュータブル〜間奏編〜", venue:"MUFGスタジアム（国立競技場）", memo:"ファンクラブ会員限定公演。バンド史上初の国立4days、その1日" },
+  { date:"2026.09.30 (Wed)", name:"Ringo Jam Tour “SHADOWS”", venue:"あなぶきアリーナ香川", memo:"ツアー初日！ 6thアルバム『POPS』の発売日と同じ日" },
+];
+
+// ▼ 聴きたい曲（プレイリスト「harmonyお願い」の曲名を順に入れると、
+//   「今日の予習曲」と「当日の答え合わせ」が表示されます）
+const SONGS = ["シンデレラ","Variety","Just a Friend","リスキーゲーム","Theater","Oz","HeLLo","FACTORY","Folktale","SimPle","アウフヘーベン","Attitude","慶びの種","我逢人","PARTY","恋と吟(うた)","キコリ時計","庶幾の唄","ニュー・マイ・ノーマル","君を知らない","フロリジナル","CHEERS","Love me, Love you","本と彗星"];
+const SONG_COUNT = SONGS.length || 24;
+
+const CHECK = ["チケット（スマホの充電も）","ペンライト・電池","タオル・グッズ","モバイルバッテリー","交通ルートの確認","服装を決める","身分証"];
+
+/* timeline render */
+const tl = document.getElementById("timeline");
+LIVES.forEach(l=>{
+  const el=document.createElement("div");
+  el.className="live reveal"+(l.placeholder?" placeholder":"");
+  el.innerHTML=`<div class="d num">${l.date}</div><div class="n">${l.name}</div><div class="v">${l.venue}</div>${l.memo?`<div class="memo">${l.memo}</div>`:""}`;
+  tl.appendChild(el);
+});
+const nx=document.createElement("div");
+nx.className="live next reveal";
+nx.innerHTML=`<div class="d num">2027.06.01</div><div class="n">Harmony2</div><div class="v">Kアリーナ横浜 ─ NEXT!</div>`;
+tl.appendChild(nx);
+
+/* checklist */
+let saved={};try{saved=JSON.parse(localStorage.getItem("h2check")||"{}")}catch(e){}
+const ck=document.getElementById("check");
+function updProg(){const n=CHECK.filter((_,i)=>saved[i]).length;document.getElementById("prog").textContent=`${n} / ${CHECK.length} 完了`+(n===CHECK.length?" 🎉 準備万端！":"")}
+CHECK.forEach((t,i)=>{
+  const lb=document.createElement("label");lb.className="reveal"+(saved[i]?" done":"");
+  lb.innerHTML=`<input type="checkbox" ${saved[i]?"checked":""}><span>${t}</span>`;
+  lb.querySelector("input").addEventListener("change",e=>{
+    saved[i]=e.target.checked;lb.classList.toggle("done",e.target.checked);
+    try{localStorage.setItem("h2check",JSON.stringify(saved))}catch(err){}
+    updProg();
+  });
+  ck.appendChild(lb);
+});
+updProg();
+
+/* songs */
+if(SONGS.length){
+  const di=Math.floor((Date.now()+9*36e5)/864e5)%SONGS.length;
+  const t=document.getElementById("today");t.hidden=false;
+  t.innerHTML=`<small>TODAY'S 予習曲</small><b>${SONGS[di]}</b>`;
+  document.getElementById("setlistSec").hidden=false;
+  let got={};try{got=JSON.parse(localStorage.getItem("h2set")||"{}")}catch(e){}
+  const box=document.getElementById("songs"),hit=document.getElementById("hit");
+  const upd=()=>{const n=SONGS.filter((_,i)=>got[i]).length;hit.textContent=`${n} / ${SONGS.length}`+(n===SONGS.length?" 全部聴けた！":"")};
+  SONGS.forEach((s,i)=>{
+    const lb=document.createElement("label");lb.className="reveal"+(got[i]?" done":"");
+    lb.innerHTML=`<input type="checkbox" ${got[i]?"checked":""}><span>${i+1}. ${s}</span>`;
+    lb.querySelector("input").addEventListener("change",e=>{got[i]=e.target.checked;lb.classList.toggle("done",e.target.checked);try{localStorage.setItem("h2set",JSON.stringify(got))}catch(err){}upd()});
+    box.appendChild(lb);
+  });
+  upd();
+}
+
+/* countdown */
+const pad=n=>String(n).padStart(2,"0");
+function tick(){
+  const now=new Date();let diff=Math.max(0,TARGET-now);
+  const d=Math.floor(diff/864e5),h=Math.floor(diff/36e5)%24,m=Math.floor(diff/6e4)%60,s=Math.floor(diff/1e3)%60;
+  days.textContent=d;days2.textContent=d;
+  document.getElementById("h").textContent=pad(h);
+  document.getElementById("m").textContent=pad(m);
+  document.getElementById("s").textContent=pad(s);
+  mini.textContent=`Harmony2まで ${d}日`;
+  weekends.textContent=Math.floor(d/7);
+  sleeps.textContent=d;
+  months.textContent=Math.floor(d/30.4);
+  loops.textContent=d;
+  perweek.textContent=Math.max(1,Math.ceil(SONG_COUNT/Math.max(1,Math.floor(d/7))));
+  const p=Math.min(100,Math.max(0,(now-START)/(TARGET-START)*100));
+  pct.textContent=p.toFixed(1);
+  if(diff===0){days.textContent="今日!";}
+}
+tick();setInterval(tick,1000);
+
+/* reveal + bg change */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in")}),{threshold:.15});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+const secs=[...document.querySelectorAll("section[data-bg]")];
+const bgio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){const [a,b]=e.target.dataset.bg.split(",");document.body.style.background=`linear-gradient(160deg,${a},${b})`}
+}),{threshold:.5});
+secs.forEach(s=>bgio.observe(s));
+
+/* progress bar + mini badge */
+addEventListener("scroll",()=>{
+  const max=document.documentElement.scrollHeight-innerHeight;
+  bar.style.width=(scrollY/max*100)+"%";
+  mini.classList.toggle("on",scrollY>innerHeight*1.5);
+},{passive:true});
+
+/* ===== stage effects (canvas) ===== */
+const cv=document.getElementById("stage"),cx=cv.getContext("2d");
+let W,H,DPR=Math.min(2,devicePixelRatio||1);
+function rs(){W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}
+rs();addEventListener("resize",rs);
+let penCol=["#9be15d"],penTarget=1;let penAlpha=1;
+const PENS=[];
+for(let r=0;r<4;r++){const n=34-r*5;for(let i=0;i<n;i++)PENS.push({row:r,x:(i+Math.random()*.8)/n,ph:Math.random()*6.28,sp:.8+Math.random()*.6,ci:Math.floor(Math.random()*9)})}
+const TAPES=[];
+function shoot(n=90){for(let i=0;i<n;i++)TAPES.push({x:Math.random()*W,y:-20-Math.random()*H*.8,vy:1.2+Math.random()*1.8,vx:(Math.random()-.5)*.6,len:40+Math.random()*60,w:7+Math.random()*5,rot:Math.random()*6.28,vr:(Math.random()-.5)*.04,fl:Math.random()*6.28,vf:.06+Math.random()*.08,sw:Math.random()*6.28})}
+function frame(t){
+  t/=1000;cx.clearRect(0,0,W,H);
+  penAlpha+=(penTarget-penAlpha)*.05;
+  // penlights
+  if(penAlpha>.02){
+    PENS.forEach(p=>{
+      const depth=1-p.row*.2, baseY=H*(1.02-p.row*.06), len=(H*.09)*depth;
+      const x=p.x*W+(p.row%2)*12, ang=Math.sin(t*p.sp*2.2+p.ph)*.45;
+      const tx=x+Math.sin(ang)*len, ty=baseY-Math.cos(ang)*len;
+      const c=penCol[p.ci%penCol.length];
+      cx.globalAlpha=penAlpha*(.35+depth*.55);
+      cx.strokeStyle=c;cx.lineCap="round";cx.lineWidth=5*depth;
+      cx.shadowColor=c;cx.shadowBlur=18*depth;
+      cx.beginPath();cx.moveTo(x,baseY);cx.lineTo(tx,ty);cx.stroke();
+      cx.shadowBlur=0;cx.fillStyle="#fff";cx.globalAlpha=penAlpha*.7*depth;
+      cx.beginPath();cx.arc(tx,ty,1.8*depth,0,6.28);cx.fill();
+    });
+    // glow haze
+    const g=cx.createLinearGradient(0,H*.7,0,H);g.addColorStop(0,"rgba(0,0,0,0)");g.addColorStop(1,penCol[0]+"33");
+    cx.globalAlpha=penAlpha;cx.fillStyle=g;cx.fillRect(0,H*.7,W,H*.3);
+  }
+  // silver tapes
+  for(let i=TAPES.length-1;i>=0;i--){
+    const s=TAPES[i];s.y+=s.vy;s.sw+=.03;s.x+=s.vx+Math.sin(s.sw)*.7;s.rot+=s.vr;s.fl+=s.vf;
+    const f=Math.cos(s.fl),br=Math.floor(170+Math.abs(f)*85);
+    cx.save();cx.translate(s.x,s.y);cx.rotate(s.rot);cx.scale(1,1);
+    cx.globalAlpha=.9;cx.shadowBlur=0;
+    const gr=cx.createLinearGradient(-s.w,0,s.w,0);
+    gr.addColorStop(0,`rgb(${br-60},${br-55},${br-40})`);gr.addColorStop(.5,`rgb(${br},${br},${Math.min(255,br+10)})`);gr.addColorStop(1,`rgb(${br-70},${br-65},${br-50})`);
+    cx.fillStyle=gr;
+    cx.beginPath();const w=s.w*Math.max(.15,Math.abs(f));
+    for(let k=0;k<=10;k++){const yy=-s.len/2+s.len*k/10,xx=Math.sin(k*.6+s.fl)*6;k?cx.lineTo(xx-w/2,yy):cx.moveTo(xx-w/2,yy)}
+    for(let k=10;k>=0;k--){const yy=-s.len/2+s.len*k/10,xx=Math.sin(k*.6+s.fl)*6;cx.lineTo(xx+w/2,yy)}
+    cx.closePath();cx.fill();
+    if(Math.abs(f)>.92){cx.fillStyle="#fff";cx.globalAlpha=.8;cx.fillRect(-1,-s.len/2,2,s.len)}
+    cx.restore();
+    if(s.y>H+80)TAPES.splice(i,1);
+  }
+  cx.globalAlpha=1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* section-driven effects */
+const shot=new Set();
+const fxio=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;const d=e.target.dataset;
+  if(d.pen){penCol=d.pen.split(",");penTarget=1}else penTarget=.15;
+  if(d.tape&&!shot.has(e.target)){shot.add(e.target);shoot(+d.tape)}
+}),{threshold:.5});
+secs.forEach(s=>fxio.observe(s));
+document.querySelectorAll("[data-retape]").forEach(b=>b.addEventListener("click",()=>shoot(120)));
+</script>
+</body>
+</html>
